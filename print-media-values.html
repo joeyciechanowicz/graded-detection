@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <style>
+
+        .true {
+            background: palegreen;
+        }
+
+        .false {
+            background: palevioletred;
+        }
+
+        h4 {
+            margin: 0;
+            padding: 2px;
+        }
+    </style>
+</head>
+
+<body>
+<div id="results">
+
+</div>
+
+<script type="text/javascript">
+
+
+	function searchInteger(query, units) {
+		var ls;
+		var low = 0;
+		var high = 16384;
+		var current = parseInt((low + high) / 2);
+		var i = 20;
+
+		while (i > 0 && (current - low > 1) && (high - current > 1)) {
+			i--; // Just in case we can't find it quick enough
+			if (window.matchMedia('(min-' + query + ':' + current + units + ')').matches) {
+				low = current;
+				ls = 0;
+			} else {
+				high = current;
+				ls = 1;
+			}
+			current = parseInt((high + low) / 2);
+		}
+		current -= ls;
+		return current;
+	}
+
+	function checkList(query, values) {
+		var results = [];
+		results.push({
+			value: 'No value',
+			matches: window.matchMedia('(' + query + ')').matches
+		});
+		for (var i = 0; i < values.length; i++) {
+			results.push({
+				value: values[i],
+				matches: window.matchMedia('(' + query + ': ' + values[i] + ')').matches
+			});
+		}
+		return results;
+	}
+
+	function printListResult(results) {
+		var text = '<ul>';
+
+		results.forEach(function (result) {
+			text += '<li>' + result.value + ' = <span class="' + (result.matches ? 'true' : 'false') + '">' + result.matches + '</span></li>'
+		});
+
+		text += '</ul>';
+		return text;
+	}
+
+	var features = {
+		width: 'px',
+		height: 'px',
+		// aspect-ratio: needs support for fractions,
+		orientation: ['portrait', 'landscape'],
+		resolution: 'dpi',
+        scan: ['interlace', 'progressive', 'none'],
+        grid: ['0', '1', 'none'],
+        update: ['none', 'slow', 'fast'],
+        'overflow-block': ['none', 'scroll', 'optional-paged', 'paged'],
+        'overflow-inline': ['none', 'scroll'],
+        color: '',
+        'color-gamut': ['srgb', 'p3', 'rec2020', 'none'],
+        'color-index': '',
+        'display-mode': ['fullscreen', 'standalone', 'minimal-ui', 'browser'],
+		monochrome: '',
+        'inverted-colors': ['none', 'inverted'],
+        pointer: ['none', 'coarse', 'fine'],
+        hover: ['none', 'hover'],
+        'any-pointer': ['none', 'coarse', 'fine'],
+        'any-hover': ['none', 'hover'],
+        'light-level': ['dim', 'normal', 'washed'],
+        scripting: ['none', 'initial-only', 'enabled'],
+        'device-width': 'px',
+        'device-height': 'px',
+		// device-aspect-ratio: needs support for fractions,
+        '-ms-high-contrast': ['active', 'black-on-white', 'white-on-black', 'none']
+	};
+
+	var resultsDiv = document.getElementById('results');
+
+	Object.keys(features).forEach(function (featureName) {
+		var units = features[featureName];
+
+		if (Array.isArray(units)) {
+			var results = checkList(featureName, units);
+
+			resultsDiv.innerHTML += '<h4>' + featureName + '</h4>' + printListResult(results);
+
+		} else {
+			var result = searchInteger(featureName, units);
+			resultsDiv.innerHTML += '<h4>' + featureName + ' = ' + result + units + '</h4>';
+		}
+	});
+
+</script>
+</body>
+
